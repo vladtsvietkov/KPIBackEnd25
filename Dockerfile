@@ -1,9 +1,9 @@
 FROM python:3.13.0-slim
 
-WORKDIR /app
+WORKDIR /backend
 COPY requirements.txt .
 RUN python -m pip install -r requirements.txt
 
-COPY . /app
+COPY . /backend
 
-CMD flask --app api run -h 0.0.0.0 -p $PORT
+CMD flask --app backend run -h 0.0.0.0 -p $PORT
