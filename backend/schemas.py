@@ -2,7 +2,12 @@ from marshmallow import Schema, fields
 
 class UserSchema(Schema):
     id = fields.Int(dump_only=True)
-    name = fields.Str(required=True)
+    username = fields.Str(required=True)
+    password = fields.Str(load_only=True, required=True)
+
+class UserLoginSchema(Schema):
+    username = fields.Str(required=True)
+    password = fields.Str(required=True)
 
 class CategorySchema(Schema):
     id = fields.Int(dump_only=True)

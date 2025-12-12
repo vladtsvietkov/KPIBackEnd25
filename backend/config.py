@@ -10,3 +10,5 @@ class Config:
     OPENAPI_URL_PREFIX = "/"
     OPENAPI_SWAGGER_UI_PATH = "/swagger-ui"
     OPENAPI_SWAGGER_UI_URL = "https://cdn.jsdelivr.net/npm/swagger-ui-dist/"
+
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "mega-secret-lab4-key")
