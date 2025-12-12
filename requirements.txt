@@ -5,3 +5,5 @@ flask-sqlalchemy
 flask-migrate
 psycopg2-binary
 marshmallow
+flask-jwt-extended
+passlib
