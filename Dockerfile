@@ -6,4 +6,4 @@ RUN python -m pip install -r requirements.txt
 
 COPY . /backend
 
-CMD flask --app backend run -h 0.0.0.0 -p $PORT
+CMD sh -c "flask db upgrade && flask --app backend run -h 0.0.0.0 -p $PORT"
