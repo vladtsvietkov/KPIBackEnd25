@@ -20,6 +20,12 @@
 git clone https://github.com/vladtsvietkov/KPIBackEnd25.git
 cd KPIBackEnd25  
 ```
+2. **Налаштуйте файл конфігурації середовища .env:**
+Створіть файл .env у кореневій директорії проєкту (cd KPIBackEnd25) та налаштуйте наступні параметри:
+```
+SQLALCHEMY_DATABASE_URI = your_database_uri
+```
+
 2. **Збірка та запуск контейнерів:**    
 Перебуваючи у головній директорії проєкту, виконайте команду для ініціалізації:   
 ```bash
@@ -48,3 +54,6 @@ curl http://localhost:8080/healthcheck
   "message": "Backend is functional"
 }
 ```
+
+Також можна отримати інтерактивну документацію з встроєнним тестуванням Swagger за посилсанням
+http://localhost:8080/swagger-ui
