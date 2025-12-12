@@ -1,29 +1,49 @@
+from flask import jsonify
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
+from passlib.hash import pbkdf2_sha256
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+
 from backend.extensions import db
 from backend.models import User, Category, Record
-from backend.schemas import UserSchema, CategorySchema, RecordSchema
+from backend.schemas import UserSchema, UserLoginSchema, CategorySchema, RecordSchema
 
 blp = Blueprint("api", "api", url_prefix="/")
 
 
-@blp.route("/user")
-class UserResource(MethodView):
-    @blp.response(200, UserSchema(many=True))
-    def get(self):
-        return User.query.all()
-
+@blp.route("/register")
+class UserRegister(MethodView):
     @blp.arguments(UserSchema)
-    @blp.response(200, UserSchema)
+    @blp.response(201, UserSchema)
     def post(self, user_data):
-        user = User(**user_data)
+        if db.session.execute(db.select(User).where(User.username == user_data["username"])).scalar():
+            abort(409, message="A user with that username already exists.")
+
+        user = User(
+            username=user_data["username"],
+            password=pbkdf2_sha256.hash(user_data["password"]),
+        )
         db.session.add(user)
         db.session.commit()
         return user
 
 
+@blp.route("/login")
+class UserLogin(MethodView):
+    @blp.arguments(UserLoginSchema)
+    def post(self, user_data):
+        user = db.session.execute(db.select(User).where(User.username == user_data["username"])).scalar()
+
+        if user and pbkdf2_sha256.verify(user_data["password"], user.password):
+            access_token = create_access_token(identity=str(user.id))
+            return jsonify({"access_token": access_token})
+
+        abort(401, message="Invalid credentials.")
+
+
 @blp.route("/user/<int:user_id>")
-class UserByIdResource(MethodView):
+class UserResource(MethodView):
+    @jwt_required()
     @blp.response(200, UserSchema)
     def get(self, user_id):
         user = db.session.get(User, user_id)
@@ -31,6 +51,7 @@ class UserByIdResource(MethodView):
             abort(404, message="User not found")
         return user
 
+    @jwt_required()
     def delete(self, user_id):
         user = db.session.get(User, user_id)
         if not user:
@@ -42,10 +63,12 @@ class UserByIdResource(MethodView):
 
 @blp.route("/category")
 class CategoryResource(MethodView):
+    @jwt_required()
     @blp.response(200, CategorySchema(many=True))
     def get(self):
         return Category.query.all()
 
+    @jwt_required()
     @blp.arguments(CategorySchema)
     @blp.response(200, CategorySchema)
     def post(self, category_data):
@@ -62,6 +85,7 @@ class CategoryResource(MethodView):
 
 @blp.route("/category/<int:category_id>")
 class CategoryByIdResource(MethodView):
+    @jwt_required()
     def delete(self, category_id):
         category = db.session.get(Category, category_id)
         if not category:
@@ -73,6 +97,7 @@ class CategoryByIdResource(MethodView):
 
 @blp.route("/record")
 class RecordResource(MethodView):
+    @jwt_required()
     @blp.arguments(RecordSchema)
     @blp.response(200, RecordSchema)
     def post(self, record_data):
@@ -92,6 +117,7 @@ class RecordResource(MethodView):
 
 @blp.route("/record/<int:record_id>")
 class RecordByIdResource(MethodView):
+    @jwt_required()
     @blp.response(200, RecordSchema)
     def get(self, record_id):
         record = db.session.get(Record, record_id)
@@ -99,6 +125,7 @@ class RecordByIdResource(MethodView):
             abort(404, message="Record not found")
         return record
 
+    @jwt_required()
     def delete(self, record_id):
         record = db.session.get(Record, record_id)
         if not record:
