@@ -3,7 +3,7 @@ __pycache__/
 *.py[codz]
 *$py.class
 .idea
-
+/backend/app.db
 # C extensions
 *.so
 
