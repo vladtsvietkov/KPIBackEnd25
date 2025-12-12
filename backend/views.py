@@ -10,6 +10,9 @@ from backend.schemas import UserSchema, UserLoginSchema, CategorySchema, RecordS
 
 blp = Blueprint("api", "api", url_prefix="/")
 
+@blp.route("/healthcheck")
+def healthcheck():
+    return jsonify({"status": "OK", "message": "Backend is functional"})
 
 @blp.route("/register")
 class UserRegister(MethodView):
