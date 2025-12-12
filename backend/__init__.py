@@ -11,6 +11,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     api.init_app(app)
+    jwt.init_app(app)
 
     api.register_blueprint(views.blp)
 
