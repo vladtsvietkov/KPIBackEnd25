@@ -2,7 +2,7 @@ from flask import jsonify
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from passlib.hash import pbkdf2_sha256
-from flask_jwt_extended import create_access_token, jwt_required
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
 from backend.extensions import db
 from backend.models import User, Category, Record
@@ -104,15 +104,17 @@ class RecordResource(MethodView):
     @blp.arguments(RecordSchema)
     @blp.response(200, RecordSchema)
     def post(self, record_data):
-        user = db.session.get(User, record_data["user_id"])
+        current_user_id = get_jwt_identity()
+
         category = db.session.get(Category, record_data["category_id"])
 
-        if not user:
-            abort(400, message="User does not exist")
         if not category:
             abort(400, message="Category does not exist")
 
-        record = Record(**record_data)
+        record = Record(
+            user_id=int(current_user_id),
+            **record_data
+        )
         db.session.add(record)
         db.session.commit()
         return record
