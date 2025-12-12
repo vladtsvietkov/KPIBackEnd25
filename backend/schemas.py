@@ -12,7 +12,7 @@ class UserLoginSchema(Schema):
 class CategorySchema(Schema):
     id = fields.Int(dump_only=True)
     name = fields.Str(required=True)
-    user_id = fields.Int(load_default=None)
+    user_id = fields.Int(dump_only=True)
 
 class RecordSchema(Schema):
     id = fields.Int(dump_only=True)
@@ -20,3 +20,6 @@ class RecordSchema(Schema):
     category_id = fields.Int(required=True)
     amount = fields.Float(required=True)
     timestamp = fields.DateTime(dump_only=True)
+
+class RecordQuerySchema(Schema):
+    category_id = fields.Int(load_default=None)

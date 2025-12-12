@@ -3,10 +3,10 @@ from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from passlib.hash import pbkdf2_sha256
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-
+from sqlalchemy import or_
 from backend.extensions import db
 from backend.models import User, Category, Record
-from backend.schemas import UserSchema, UserLoginSchema, CategorySchema, RecordSchema
+from backend.schemas import UserSchema, UserLoginSchema, CategorySchema, RecordSchema, RecordQuerySchema
 
 blp = Blueprint("api", "api", url_prefix="/")
 
@@ -69,18 +69,22 @@ class CategoryResource(MethodView):
     @jwt_required()
     @blp.response(200, CategorySchema(many=True))
     def get(self):
-        return Category.query.all()
+        current_user_id = get_jwt_identity()
+
+        return Category.query.filter(
+            or_(Category.user_id == None, Category.user_id == current_user_id)
+        ).all()
 
     @jwt_required()
     @blp.arguments(CategorySchema)
     @blp.response(200, CategorySchema)
     def post(self, category_data):
-        if category_data.get("user_id"):
-            user = db.session.get(User, category_data["user_id"])
-            if not user:
-                abort(404, message="User not found")
+        current_user_id = get_jwt_identity()
 
-        category = Category(**category_data)
+        category = Category(
+            user_id=int(current_user_id),
+            **category_data
+        )
         db.session.add(category)
         db.session.commit()
         return category
@@ -118,6 +122,20 @@ class RecordResource(MethodView):
         db.session.add(record)
         db.session.commit()
         return record
+
+    @jwt_required()
+    @blp.arguments(RecordQuerySchema, location="query")
+    @blp.response(200, RecordSchema(many=True))
+    def get(self, args):
+        current_user_id = get_jwt_identity()
+
+        query = Record.query.filter_by(user_id=current_user_id)
+
+        category_id = args.get("category_id")
+        if category_id:
+            query = query.filter_by(category_id=category_id)
+
+        return query.all()
 
 
 @blp.route("/record/<int:record_id>")
