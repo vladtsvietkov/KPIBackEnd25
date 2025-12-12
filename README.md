@@ -20,10 +20,11 @@
 git clone https://github.com/vladtsvietkov/KPIBackEnd25.git
 cd KPIBackEnd25  
 ```
-2. **Налаштуйте файл конфігурації середовища .env:**
+2. **Налаштуйте файл конфігурації середовища .env:**   
 Створіть файл .env у кореневій директорії проєкту (cd KPIBackEnd25) та налаштуйте наступні параметри:
 ```
-SQLALCHEMY_DATABASE_URI = your_database_uri
+SQLALCHEMY_DATABASE_URI = your_database_uri  
+JWT_SECRET_KEY = your_secret_key
 ```
 
 2. **Збірка та запуск контейнерів:**    
